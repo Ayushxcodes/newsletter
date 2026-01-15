@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 type Article = {
   id: string;
@@ -29,18 +30,28 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
   const router = useRouter();
 
   async function handleDelete(id: string) {
-    if (!confirm("Are you sure you want to delete this article?")) return;
+    toast("Are you sure you want to delete this article?", {
+      action: {
+        label: "Delete",
+        onClick: async () => {
+          const res = await fetch(`/api/admin/articles/${id}`, {
+            method: "DELETE",
+            credentials: "include",
+          });
 
-    const res = await fetch(`/api/admin/articles/${id}`, {
-      method: "DELETE",
-      credentials: "include",
+          if (res.ok) {
+            router.refresh();
+            toast.success("Article deleted successfully");
+          } else {
+            toast.error("Failed to delete article");
+          }
+        },
+      },
+      cancel: {
+        label: "Cancel",
+        onClick: () => {},
+      },
     });
-
-    if (res.ok) {
-      router.refresh(); // Refresh the page to update the list
-    } else {
-      alert("Failed to delete article");
-    }
   }
 
   return (
