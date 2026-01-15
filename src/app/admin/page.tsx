@@ -1,25 +1,18 @@
 // src/app/admin/page.tsx
 import { redirect } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { auth } from "@/lib/auth";
 
 export default async function AdminPage() {
-  // ✅ Await the creation of the Supabase server client
-  const supabase = await createServerSupabaseClient();
-
-  // Get the current session
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  // Get the current session using NextAuth
+  const session = await auth();
 
   // If no session, redirect
   if (!session?.user) {
     redirect("/");
   }
 
-  const ADMIN_EMAIL = "krish989pandey@gmail.com";
-
   // If user is not admin, redirect
-  if (session.user.email !== ADMIN_EMAIL) {
+  if (!session.user.isAdmin) {
     redirect("/");
   }
 
