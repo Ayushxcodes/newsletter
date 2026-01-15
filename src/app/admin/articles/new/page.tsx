@@ -2,52 +2,48 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase-client";
 
 export default function NewArticlePage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [published, setPublished] = useState(false);
   const router = useRouter();
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const { error } = await supabase.from("articles").insert({
-      title,
-      content,
-      published: false,
+    await fetch("/api/admin/articles", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, content, published }),
     });
 
-    if (error) {
-      console.error(error);
-      alert("Failed to save article");
-      return;
-    }
-
-    router.push("/admin/articles");
-  }
+    router.push("/admin");
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="p-8 space-y-4 max-w-3xl">
+    <form onSubmit={handleSubmit} className="p-8 space-y-4 max-w-2xl mx-auto">
       <h1 className="text-3xl font-bold">New Article</h1>
-
       <input
-        className="w-full border p-2 rounded"
+        type="text"
         placeholder="Title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
+        className="w-full border p-2 rounded"
         required
       />
-
       <textarea
-        className="w-full border p-2 rounded h-64"
         placeholder="Content"
         value={content}
         onChange={(e) => setContent(e.target.value)}
+        className="w-full border p-2 rounded h-64"
         required
       />
-
-      <button className="bg-blue-600 text-white px-4 py-2 rounded">
+      <label className="flex items-center space-x-2">
+        <input type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} />
+        <span>Publish?</span>
+      </label>
+      <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">
         Save Article
       </button>
     </form>

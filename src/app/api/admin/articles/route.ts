@@ -1,84 +1,40 @@
-import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { NextRequest, NextResponse } from "next/server";
+import { createServerSupabaseClient } from "@/lib/supabase-server";
 
-/* ---------------- TYPES ---------------- */
-type Article = {
-  id: string;
-  title: string;
-  content: string;
-  published: boolean;
-  createdAt: Date;
-};
-
-/* ---------------- GLOBAL STORE (DEV ONLY) ---------------- */
-// This prevents data loss between requests in Next.js dev mode
-const globalForArticles = globalThis as unknown as {
-  articles?: Article[];
-};
-
-export const articles: Article[] = globalForArticles.articles ?? [
-  {
-    id: "sample-1",
-    title: "Sample Article 1",
-    content: "This is a sample article for testing.",
-    published: true,
-    createdAt: new Date("2024-01-01"),
-  },
-  {
-    id: "sample-2",
-    title: "Sample Article 2",
-    content: "Another sample article.",
-    published: false,
-    createdAt: new Date("2024-01-02"),
-  },
-];
-globalForArticles.articles = articles;
-
-/* ---------------- GET: LIST ARTICLES ---------------- */
+// GET all articles
 export async function GET() {
-  const session = await auth();
-
-  if (!session || !session.user?.isAdmin) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
-  }
-
-  return NextResponse.json(articles);
+  const supabaseServer = await createServerSupabaseClient();
+  const { data, error } = await supabaseServer.from("articles").select("*").order("created_at", { ascending: false });
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json(data);
 }
 
-/* ---------------- POST: CREATE ARTICLE ---------------- */
-export async function POST(req: Request) {
-  const session = await auth();
-
-  if (!session || !session.user?.isAdmin) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
-  }
-
+// POST new article
+export async function POST(req: NextRequest) {
+  const supabaseServer = await createServerSupabaseClient();
   const body = await req.json();
   const { title, content, published } = body;
+  const { data, error } = await supabaseServer.from("articles").insert([{ title, content, published }]);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json(data);
+}
 
-  if (!title || !content) {
-    return NextResponse.json(
-      { error: "Title and content are required" },
-      { status: 400 }
-    );
-  }
+// PUT and DELETE for /articles/:id
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+  const supabaseServer = await createServerSupabaseClient();
+  const body = await req.json();
+  const { title, content, published } = body;
+  const { data, error } = await supabaseServer
+    .from("articles")
+    .update({ title, content, published })
+    .eq("id", params.id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json(data);
+}
 
-  const newArticle: Article = {
-    id: crypto.randomUUID(),
-    title,
-    content,
-    published: Boolean(published),
-    createdAt: new Date(),
-  };
-
-  // Add newest first
-  articles.unshift(newArticle);
-
-  return NextResponse.json(newArticle, { status: 201 });
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  const supabaseServer = await createServerSupabaseClient();
+  const { data, error } = await supabaseServer.from("articles").delete().eq("id", params.id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json(data);
 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { articles } from "../route";
+import { createServerSupabaseClient } from "@/lib/supabase-server";
 
 /* ---------------- DELETE: DELETE ARTICLE ---------------- */
 export async function DELETE(
@@ -17,16 +17,15 @@ export async function DELETE(
   }
 
   const { id } = await params;
-  const index = articles.findIndex((article) => article.id === id);
+  const supabaseServer = await createServerSupabaseClient();
+  const { error } = await supabaseServer.from("articles").delete().eq("id", id);
 
-  if (index === -1) {
+  if (error) {
     return NextResponse.json(
-      { error: "Article not found" },
-      { status: 404 }
+      { error: error.message },
+      { status: 500 }
     );
   }
-
-  articles.splice(index, 1);
 
   return NextResponse.json({ success: true });
 }
@@ -46,11 +45,16 @@ export async function GET(
   }
 
   const { id } = await params;
-  const article = articles.find((article) => article.id === id);
+  const supabaseServer = await createServerSupabaseClient();
+  const { data: article, error } = await supabaseServer
+    .from("articles")
+    .select("*")
+    .eq("id", id)
+    .single();
 
-  if (!article) {
+  if (error) {
     return NextResponse.json(
-      { error: "Article not found" },
+      { error: error.message },
       { status: 404 }
     );
   }
@@ -73,15 +77,6 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const index = articles.findIndex((article) => article.id === id);
-
-  if (index === -1) {
-    return NextResponse.json(
-      { error: "Article not found" },
-      { status: 404 }
-    );
-  }
-
   const body = await req.json();
   const { title, content, published } = body;
 
@@ -92,12 +87,20 @@ export async function PUT(
     );
   }
 
-  articles[index] = {
-    ...articles[index],
-    title,
-    content,
-    published: Boolean(published),
-  };
+  const supabaseServer = await createServerSupabaseClient();
+  const { data: article, error } = await supabaseServer
+    .from("articles")
+    .update({ title, content, published: Boolean(published) })
+    .eq("id", id)
+    .select()
+    .single();
 
-  return NextResponse.json(articles[index]);
+  if (error) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json(article);
 }

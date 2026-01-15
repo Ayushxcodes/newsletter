@@ -1,122 +1,67 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { useState, useEffect, use } from "react";
+import { useRouter } from "next/navigation";
 
-type Article = {
-  id: string;
-  title: string;
-  content: string;
-  published: boolean;
-  createdAt: Date;
-};
+interface Props {
+  params: Promise<{ id: string }>;
+}
 
-export default function EditArticlePage() {
+export default function EditArticlePage({ params }: Props) {
   const router = useRouter();
-  const params = useParams();
-  const id = params.id as string;
-
+  const { id } = use(params);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [published, setPublished] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [fetchLoading, setFetchLoading] = useState(true);
 
   useEffect(() => {
     async function fetchArticle() {
-      const res = await fetch(`/api/admin/articles/${id}`, {
-        credentials: "include",
-      });
-      if (res.ok) {
-        const article: Article = await res.json();
-        setTitle(article.title);
-        setContent(article.content);
-        setPublished(article.published);
-      } else {
-        alert("Failed to load article");
-        router.push("/admin/articles");
-      }
-      setFetchLoading(false);
+      const res = await fetch(`/api/admin/articles/${id}`);
+      const data = await res.json();
+      setTitle(data.title);
+      setContent(data.content);
+      setPublished(data.published);
     }
     fetchArticle();
-  }, [id, router]);
+  }, [id]);
 
-  async function handleSubmit() {
-    if (!title || !content) return;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-    setLoading(true);
-
-    const res = await fetch(`/api/admin/articles/${id}`, {
+    await fetch(`/api/admin/articles/${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title,
-        content,
-        published,
-      }),
-      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, content, published }),
     });
 
-    setLoading(false);
-
-    if (res.ok) {
-      router.push("/admin/articles");
-    } else {
-      alert("Failed to update article");
-    }
-  }
-
-  if (fetchLoading) {
-    return <div className="p-8">Loading...</div>;
-  }
+    router.push("/admin");
+  };
 
   return (
-    <div className="max-w-3xl p-8 space-y-6">
+    <form onSubmit={handleSubmit} className="p-8 space-y-4 max-w-2xl mx-auto">
       <h1 className="text-3xl font-bold">Edit Article</h1>
-
-      <div className="space-y-2">
-        <Label>Title</Label>
-        <Input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Article title"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Content</Label>
-        <Textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Article content"
-          rows={10}
-        />
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="published"
-          checked={published}
-          onCheckedChange={setPublished}
-        />
-        <Label htmlFor="published">Published</Label>
-      </div>
-
-      <div className="flex space-x-4">
-        <Button onClick={handleSubmit} disabled={loading}>
-          {loading ? "Saving..." : "Save Changes"}
-        </Button>
-        <Button variant="outline" onClick={() => router.push("/admin/articles")}>
-          Cancel
-        </Button>
-      </div>
-    </div>
+      <input
+        type="text"
+        placeholder="Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        className="w-full border p-2 rounded"
+        required
+      />
+      <textarea
+        placeholder="Content"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        className="w-full border p-2 rounded h-64"
+        required
+      />
+      <label className="flex items-center space-x-2">
+        <input type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} />
+        <span>Publish?</span>
+      </label>
+      <button type="submit" className="px-4 py-2 bg-yellow-500 text-white rounded">
+        Update Article
+      </button>
+    </form>
   );
 }

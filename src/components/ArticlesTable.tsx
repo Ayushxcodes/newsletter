@@ -18,7 +18,7 @@ type Article = {
   title: string;
   content: string;
   published: boolean;
-  createdAt: Date;
+  created_at: string | null;
 };
 
 interface ArticlesTableProps {
@@ -66,7 +66,7 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
                 )}
               </TableCell>
               <TableCell>
-                {new Date(article.createdAt).toLocaleDateString()}
+                {article.created_at ? new Date(article.created_at).toLocaleDateString() : 'N/A'}
               </TableCell>
               <TableCell>
                 <div className="flex space-x-2">
