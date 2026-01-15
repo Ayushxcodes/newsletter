@@ -55,13 +55,13 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
   }
 
   return (
-    <div className="rounded-xl border bg-background">
+    <div className="rounded-xl border bg-background overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Title</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Created</TableHead>
+            <TableHead className="hidden sm:table-cell">Created</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -76,11 +76,11 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
                   <Badge variant="secondary">Draft</Badge>
                 )}
               </TableCell>
-              <TableCell>
+              <TableCell className="hidden sm:table-cell">
                 {article.created_at ? new Date(article.created_at).toLocaleDateString() : 'N/A'}
               </TableCell>
               <TableCell>
-                <div className="flex space-x-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Button asChild size="sm" variant="outline">
                     <Link href={`/admin/articles/${article.id}/edit`}>Edit</Link>
                   </Button>

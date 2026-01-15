@@ -22,8 +22,8 @@ export default function NewArticlePage() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-8 space-y-4 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold">New Article</h1>
+    <form onSubmit={handleSubmit} className="p-4 sm:p-8 space-y-4 max-w-2xl mx-auto">
+      <h1 className="text-2xl sm:text-3xl font-bold">New Article</h1>
       <input
         type="text"
         placeholder="Title"

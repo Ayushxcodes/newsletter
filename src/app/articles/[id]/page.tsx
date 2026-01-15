@@ -25,8 +25,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   }
 
   return (
-    <main className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-center mb-6">{article.title}</h1>
+    <main className="p-4 sm:p-8 max-w-4xl mx-auto">
+      <h1 className="text-2xl sm:text-3xl font-bold text-center mb-6">{article.title}</h1>
       <div className="prose prose-lg max-w-none">
         <ReactMarkdown>{article.content}</ReactMarkdown>
       </div>

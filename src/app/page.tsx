@@ -16,8 +16,8 @@ export default async function HomePage() {
     .order("created_at", { ascending: false });
 
   return (
-    <main className="p-8">
-      <h1 className="text-3xl font-bold mb-6">My News Platform</h1>
+    <main className="p-4 sm:p-8">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6">My News Platform</h1>
 
       {error && <p className="text-red-500">Failed to load articles</p>}
 

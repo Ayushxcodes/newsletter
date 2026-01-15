@@ -18,8 +18,8 @@ export default async function AdminArticlesPage() {
   }
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">Articles</h1>
+    <div className="p-4 sm:p-8">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6">Articles</h1>
 
       {articles.length === 0 && (
         <p className="text-gray-500">No articles yet</p>

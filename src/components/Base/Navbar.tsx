@@ -43,6 +43,7 @@ const HamburgerIcon = ({ className, ...props }: React.SVGAttributes<SVGElement>)
 export default function Navbar() {
   const { data: session, status } = useSession();
   const isAdmin = session?.user?.isAdmin;
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const navLinks = [
     { href: '/', label: 'Home' },
@@ -75,6 +76,30 @@ export default function Navbar() {
               ))}
             </NavigationMenuList>
           </NavigationMenu>
+
+          <div className="md:hidden">
+            <Popover open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <HamburgerIcon />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48">
+                <div className="flex flex-col space-y-2">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
 
         {/* Right */}
