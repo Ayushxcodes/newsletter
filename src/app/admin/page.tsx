@@ -1,58 +1,33 @@
-import { auth } from "@/lib/auth";
+// src/app/admin/page.tsx
 import { redirect } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { FileText, Users, Settings } from "lucide-react";
+import { createServerSupabaseClient } from "@/lib/supabase-server";
 
-export default async function AdminDashboard() {
-  const session = await auth();
+export default async function AdminPage() {
+  // ✅ Await the creation of the Supabase server client
+  const supabase = await createServerSupabaseClient();
 
-  if (!session || !session.user?.isAdmin) {
+  // Get the current session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  // If no session, redirect
+  if (!session?.user) {
     redirect("/");
   }
 
+  const ADMIN_EMAIL = "krish989pandey@gmail.com";
+
+  // If user is not admin, redirect
+  if (session.user.email !== ADMIN_EMAIL) {
+    redirect("/");
+  }
+
+  // ✅ User is admin
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="rounded-2xl shadow-sm">
-          <CardContent className="p-6 flex flex-col gap-4">
-            <FileText className="w-8 h-8" />
-            <h2 className="text-xl font-semibold">Articles</h2>
-            <p className="text-sm text-gray-600">
-              Create, edit and publish news articles
-            </p>
-            <Button className="mt-auto">Manage Articles</Button>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-2xl shadow-sm">
-          <CardContent className="p-6 flex flex-col gap-4">
-            <Users className="w-8 h-8" />
-            <h2 className="text-xl font-semibold">Authors</h2>
-            <p className="text-sm text-gray-600">
-              Manage authors and contributors
-            </p>
-            <Button className="mt-auto" variant="secondary">
-              View Authors
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-2xl shadow-sm">
-          <CardContent className="p-6 flex flex-col gap-4">
-            <Settings className="w-8 h-8" />
-            <h2 className="text-xl font-semibold">Settings</h2>
-            <p className="text-sm text-gray-600">
-              Configure site preferences
-            </p>
-            <Button className="mt-auto" variant="outline">
-              Open Settings
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+    <div className="p-8">
+      <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+      <p>Welcome, {session.user.email}</p>
     </div>
   );
 }

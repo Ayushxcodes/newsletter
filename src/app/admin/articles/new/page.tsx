@@ -2,80 +2,54 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { supabase } from "@/lib/supabase-client";
 
 export default function NewArticlePage() {
-  const router = useRouter();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [published, setPublished] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  async function handleSubmit() {
-    if (!title || !content) return;
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
 
-    setLoading(true);
-
-    const res = await fetch("/api/admin/articles", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title,
-        content,
-        published,
-      }),
-      credentials: "include",
+    const { error } = await supabase.from("articles").insert({
+      title,
+      content,
+      published: false,
     });
 
-    setLoading(false);
-
-    if (res.ok) {
-      router.push("/admin/articles");
-    } else {
+    if (error) {
+      console.error(error);
       alert("Failed to save article");
+      return;
     }
+
+    router.push("/admin/articles");
   }
 
   return (
-    <div className="max-w-3xl p-8 space-y-6">
+    <form onSubmit={handleSubmit} className="p-8 space-y-4 max-w-3xl">
       <h1 className="text-3xl font-bold">New Article</h1>
 
-      <div className="space-y-2">
-        <Label>Title</Label>
-        <Input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Article title"
-        />
-      </div>
+      <input
+        className="w-full border p-2 rounded"
+        placeholder="Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        required
+      />
 
-      <div className="space-y-2">
-        <Label>Content</Label>
-        <Textarea
-          rows={10}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Write your article..."
-        />
-      </div>
+      <textarea
+        className="w-full border p-2 rounded h-64"
+        placeholder="Content"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        required
+      />
 
-      <div className="flex items-center gap-3">
-        <Switch
-          checked={published}
-          onCheckedChange={setPublished}
-        />
-        <Label>Publish immediately</Label>
-      </div>
-
-      <Button onClick={handleSubmit} disabled={loading}>
-        {loading ? "Saving..." : "Save Article"}
-      </Button>
-    </div>
+      <button className="bg-blue-600 text-white px-4 py-2 rounded">
+        Save Article
+      </button>
+    </form>
   );
 }

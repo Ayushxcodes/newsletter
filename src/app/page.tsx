@@ -1,3 +1,4 @@
+import TestPage from "@/components/supa";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
 
@@ -7,6 +8,7 @@ export default async function HomePage() {
   return (
     <main style={{ padding: "2rem" }}>
       <h1>My News Platform</h1>
+      <TestPage />
 
       {session ? (
         <>
@@ -20,7 +22,9 @@ export default async function HomePage() {
         <>
           <p>You are not signed in.</p>
           <a href="/api/auth/signin">Sign in</a>
+          
         </>
+        
       )}
     </main>
   );
