@@ -1,4 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 
 export default async function AdminArticlesPage() {
@@ -8,6 +10,7 @@ export default async function AdminArticlesPage() {
   const { data: articles, error } = await supabase
     .from("articles")
     .select("*")
+    .eq("published", true)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -22,21 +25,23 @@ export default async function AdminArticlesPage() {
         <p className="text-gray-500">No articles yet</p>
       )}
 
-      <ul className="space-y-4">
+      <div className="space-y-4">
         {articles.map((article) => (
-          <li
-            key={article.id}
-            className="border p-4 rounded flex justify-between"
-          >
-            <div>
-              <h2 className="font-semibold">{article.title}</h2>
-              <p className="text-sm text-gray-500">
-                {article.published ? "Published" : "Draft"}
-              </p>
-            </div>
-          </li>
+          <Card key={article.id}>
+            <CardHeader>
+              <div className="flex justify-between items-start">
+                <CardTitle>{article.title}</CardTitle>
+                <Badge variant={article.published ? "default" : "secondary"}>
+                  {article.published ? "Published" : "Draft"}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">{article.content}</p>
+            </CardContent>
+          </Card>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
