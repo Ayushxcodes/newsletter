@@ -29,7 +29,7 @@ export default async function AdminPage() {
     <div className="p-4 sm:p-8 space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl sm:text-3xl font-bold">Admin Dashboard</h1>
-        <Link href="/admin/articles/new" className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded text-center">
+        <Link href="/admin/articles/new" className="w-full sm:w-auto px-4 py-2 bg-gray-500 text-white rounded text-center">
           New Article
         </Link>
       </div>
